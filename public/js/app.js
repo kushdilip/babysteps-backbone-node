@@ -1,9 +1,12 @@
+(function ($){
+	$("#releaseDate").datepicker();
 
 	var books = [{title:"JS the good parts", author:"John Doe", releaseDate:"2012", keywords:"JavaScript Programming"},
         {title:"CS the better parts", author:"John Doe", releaseDate:"2012", keywords:"CoffeeScript Programming"},
         {title:"Scala for the impatient", author:"John Doe", releaseDate:"2012", keywords:"Scala Programming"},
         {title:"American Psyco", author:"Bret Easton Ellis", releaseDate:"2012", keywords:"Novel Splatter"},
         {title:"Eloquent JavaScript", author:"John Doe", releaseDate:"2012", keywords:"JavaScript Programming"}];
+
 
 
 	var Book = Backbone.Model.extend({
@@ -13,7 +16,8 @@
             author:"Unknown",
             releaseDate:"Unknown",
             keywords:"Unknown"
-        }
+        },
+        idAttribute: "_id"
 	});
 
 	var Library = Backbone.Collection.extend({
@@ -76,13 +80,28 @@
 
 			$("#addBook div").children("input").each(function(i, el){
 				if($(el).val() !== ""){
-					formData[el.id] = $(el).val()
+					if(el.id === 'keywords') {
+						var keywordArray = $(el).val().split(',');
+						var keywordObjects = [];
+						for (var i = 0; i < keywordArray.length; i++) {
+							if(keywordArray[i] !== ""){
+							keywordObjects[i] = {"keyword":keywordArray[i]};
+							}
+						}
+						formData[el.id] = keywordObjects;
+						console.log(keywordArray);
+					} else if(el.id === 'releaseDate'){
+						formData[el.id] = $('#releaseDate').datepicker("getDate").getTime();						
+					} else {
+						formData[el.id] = $(el).val()
+
+					}
 				}
 			});
 
 			books.push(formData);
 
-			this.collection.add(new Book(formData));
+			this.collection.create(formData);
 		},
 
 		removeBook: function(removedBook){
@@ -109,3 +128,5 @@
 	});
 
 	var libraryView = new LibraryView();
+
+})(jQuery);
